@@ -15,11 +15,13 @@ enum OSMEndpoint {
   LZ4 = "https://lz4.overpass-api.de/api/interpreter",
   Z = "https://z.overpass-api.de/api/interpreter",
   KUMI = "https://overpass.kumi.systems/api/interpreter",
+  FR = "https://overpass.openstreetmap.fr/api/interpreter",
 }
 
-/** Tried in order; kumi first to reduce load on overpass-api.de public instances. */
+/** Tried in order; spread load across public mirrors. */
 const OVERPASS_ENDPOINTS = [
   OSMEndpoint.KUMI,
+  OSMEndpoint.FR,
   OSMEndpoint.Z,
   OSMEndpoint.LZ4,
 ];

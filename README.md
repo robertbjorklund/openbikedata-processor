@@ -92,7 +92,7 @@ Re-run formatting without re-downloading:
 | `OUTPUT_DIR` | `WORKING_DIR` | Final GeoJSON output |
 | `GENERATE_TILES` | off | Set to `1` to build `openbikemap.mbtiles` via tippecanoe |
 | `OVERPASS_ENDPOINT` | (auto) | Force a single Overpass mirror URL if auto-rotation fails |
-| `OVERPASS_ENDPOINTS` | kumi → z → lz4 | Comma-separated mirror order (optional) |
+| `OVERPASS_ENDPOINTS` | kumi → fr → z → lz4 | Comma-separated mirror order (optional) |
 | `OVERPASS_TIMEOUT` | `1800` | Overpass query timeout in seconds (use `7200` for Sweden) |
 | `MAX_OLD_SPACE_SIZE` | `4096` | Node.js heap size in MB |
 
