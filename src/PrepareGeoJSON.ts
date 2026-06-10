@@ -9,6 +9,7 @@ import toFeatureCollection from "./transforms/FeatureCollection";
 import { formatForMapboxGL } from "./transforms/MapboxGLFormatter";
 import { formatRoute } from "./transforms/RouteFormatter";
 import { formatTrail } from "./transforms/TrailFormatter";
+import { generateTiles } from "./transforms/TilesGenerator";
 import { flatMapArray } from "./transforms/StreamTransforms";
 
 export default async function prepare(paths: DataPaths, config: Config) {
@@ -32,10 +33,7 @@ export default async function prepare(paths: DataPaths, config: Config) {
   );
 
   if (config.tiles) {
-    console.log(
-      "Tile generation is configured but not yet implemented in this scaffold.",
-    );
-    console.log(`Planned output: ${config.tiles.mbTilesPath}`);
+    await generateTiles(paths.output, config.workingDir, config.tiles);
   }
 
   console.log("Done. Output written to", config.outputDir);

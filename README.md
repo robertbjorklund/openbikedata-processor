@@ -1,6 +1,6 @@
 # OpenBikeData Processor
 
-Data pipeline that consumes OpenStreetMap data and produces GeoJSON (and eventually Mapbox Vector Tiles) for [OpenBikeMap.org](https://github.com/robertbjorklund/openbikemap.org).
+Data pipeline that consumes OpenStreetMap data and produces GeoJSON and Mapbox Vector Tiles for [OpenBikeMap.org](https://github.com/robertbjorklund/openbikemap.org).
 
 Inspired by [openskidata-processor](https://github.com/robertbjorklund/openskidata-processor).
 
@@ -18,7 +18,7 @@ Overpass API (OSM)
   trails.geojson, routes.geojson
   mapboxgl_trails.geojson, mapboxgl_routes.geojson
        ↓
-  (planned) tippecanoe → openbikemap.mbtiles
+  tippecanoe → openbikemap.mbtiles
 ```
 
 ## Trail types
@@ -66,7 +66,7 @@ Re-run formatting without re-downloading:
 | `BBOX` | (world) | GeoJSON bbox `[west, south, east, north]` |
 | `WORKING_DIR` | `data` | Download and intermediate files |
 | `OUTPUT_DIR` | `WORKING_DIR` | Final GeoJSON output |
-| `GENERATE_TILES` | off | Set to `1` when MVT generation is implemented |
+| `GENERATE_TILES` | off | Set to `1` to build `openbikemap.mbtiles` via tippecanoe |
 | `MAX_OLD_SPACE_SIZE` | `4096` | Node.js heap size in MB |
 
 ## Output files
@@ -76,21 +76,31 @@ Re-run formatting without re-downloading:
 | `trails.geojson` | Individual trail segments with category, surface, MTB scale |
 | `routes.geojson` | Bicycle route relations |
 | `mapboxgl_*.geojson` | Slim properties for MapLibre rendering |
+| `openbikemap.mbtiles` | MVT tiles (`GENERATE_TILES=1`) |
+
+### Vector tiles
+
+Requires [tippecanoe](https://github.com/felt/tippecanoe) and `tile-join` on your PATH (bundled in the OpenSkiMap processor Docker image).
+
+```bash
+BBOX="[17.9,59.32,18.05,59.36]" GENERATE_TILES=1 npm run prepare-geojson
+npm run extract-tiles data/openbikemap.mbtiles data/openbikemap
+```
 
 ## Related projects
 
 | Repo | Role |
 |------|------|
 | [openbikemap.org](https://github.com/robertbjorklund/openbikemap.org) | Frontend |
-| `api.openbikemap.org` | Planned REST API |
-| `tiles.openbikemap.org` | Planned tile server |
+| [api.openbikemap.org](https://github.com/robertbjorklund/api.openbikemap.org) | REST API |
+| [tiles.openbikemap.org](https://github.com/robertbjorklund/tiles.openbikemap.org) | Tile server and MapLibre styles |
 
 ## Roadmap
 
 - [ ] Elevation profiles (port from openskidata-processor)
 - [ ] PostgreSQL geocoding cache
 - [ ] Trail network clustering
-- [ ] MVT generation via tippecanoe
+- [x] MVT generation via tippecanoe (`GENERATE_TILES=1`)
 - [ ] Extract `openbikedata-format` npm package
 
 ## License
