@@ -1,29 +1,25 @@
 import overpassBBoxQuery from "../utils/overpassBBoxQuery";
+import overpassTimeoutSeconds from "../utils/overpassTimeout";
 
 export interface OSMDownloadConfig {
   query: (bbox: GeoJSON.BBox | null) => string;
 }
 
 /**
- * Bicycle infrastructure: cycleways, paths/tracks open to cycling, MTB trails.
+ * Designated cycling trails only — not every path or street that happens to allow bikes.
  * See https://wiki.openstreetmap.org/wiki/Key:bicycle
  */
 export const trailsDownloadConfig: OSMDownloadConfig = {
   query: (bbox) => `
-    [out:json][timeout:1800]${overpassBBoxQuery(bbox)};
+    [out:json][timeout:${overpassTimeoutSeconds()}]${overpassBBoxQuery(bbox)};
     (
       way[highway=cycleway];
-      way[cycleway][cycleway!=no];
-      way["cycleway:lane"];
-      way["cycleway:track"];
-      way["cycleway:opposite"];
-      way[highway=path]["bicycle"!="no"]["access"!="private"];
-      way[highway=track]["bicycle"!="no"]["access"!="private"];
-      way[highway=bridleway]["bicycle"!="no"]["access"!="private"];
-      way[highway=path]["mtb:scale"];
-      way[highway=track]["mtb:scale"];
-      way[highway=footway]["bicycle"~"designated|yes"];
-      way[highway=service]["bicycle"~"designated|yes"];
+      way[highway=path]["bicycle"="designated"]["access"!="private"];
+      way[highway=path]["mtb:scale"]["access"!="private"];
+      way[highway=track]["bicycle"="designated"]["access"!="private"];
+      way[highway=track]["mtb:scale"]["access"!="private"];
+      way[highway=footway]["bicycle"="designated"]["access"!="private"];
+      way[highway=bridleway]["bicycle"="designated"]["access"!="private"];
     );
     (._; >;);
     out;
@@ -35,7 +31,7 @@ export const trailsDownloadConfig: OSMDownloadConfig = {
  */
 export const routesDownloadConfig: OSMDownloadConfig = {
   query: (bbox) => `
-    [out:json][timeout:1800]${overpassBBoxQuery(bbox)};
+    [out:json][timeout:${overpassTimeoutSeconds()}]${overpassBBoxQuery(bbox)};
     relation[route=bicycle];
     (._; >;);
     out;

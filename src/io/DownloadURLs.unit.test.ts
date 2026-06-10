@@ -1,10 +1,13 @@
 import { routesDownloadConfig, trailsDownloadConfig } from "./DownloadURLs";
 
 describe("Overpass queries", () => {
-  it("includes bicycle infrastructure tags in trails query", () => {
+  it("queries designated cycling trails only", () => {
     const query = trailsDownloadConfig.query(null);
     expect(query).toContain('way[highway=cycleway]');
+    expect(query).toContain('way[highway=path]["bicycle"="designated"]');
     expect(query).toContain('way[highway=path]["mtb:scale"]');
+    expect(query).not.toContain('bicycle"!="no"');
+    expect(query).not.toContain("cycleway:lane");
   });
 
   it("includes bicycle route relations", () => {

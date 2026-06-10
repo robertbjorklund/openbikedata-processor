@@ -23,19 +23,43 @@ Overpass API (OSM)
 
 ## Trail types
 
+We include **designated cycling trails** only — not every street or path that allows bikes.
+
 | Category | OSM sources |
 |----------|-------------|
-| **Cycleway** | `highway=cycleway`, dedicated `cycleway=*` |
-| **MTB trail** | `mtb:scale`, designated MTB paths |
-| **Gravel track** | `highway=track` open to cycling |
-| **Shared path** | `highway=path/footway` with bicycle access |
+| **Cycleway** | `highway=cycleway` |
+| **MTB trail** | `mtb:scale` on path/track |
+| **Gravel track** | `highway=track` + `bicycle=designated` |
+| **Shared path** | `highway=path/footway/bridleway` + `bicycle=designated` |
 | **Bicycle route** | `relation[route=bicycle]` (lcn/ncn/rcn/icn) |
+
+Unnamed shared paths shorter than 50 m and gravel tracks shorter than 100 m are dropped during formatting.
 
 ## Installation
 
 ```bash
 npm install
 npm run build
+```
+
+### Docker (recommended on Windows)
+
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/). Includes tippecanoe and tile-join. Generates GeoJSON and `openbikemap.mbtiles` in `./data`:
+
+```bash
+docker compose run --rm processor
+```
+
+Stockholm test region (default bbox):
+
+```bash
+BBOX="[17.9,59.32,18.05,59.36]" GENERATE_TILES=1 docker compose run --rm processor
+```
+
+Re-run formatting without re-downloading OSM data:
+
+```bash
+docker compose run --rm processor ./run.sh --skip-download
 ```
 
 ## Usage
@@ -67,6 +91,9 @@ Re-run formatting without re-downloading:
 | `WORKING_DIR` | `data` | Download and intermediate files |
 | `OUTPUT_DIR` | `WORKING_DIR` | Final GeoJSON output |
 | `GENERATE_TILES` | off | Set to `1` to build `openbikemap.mbtiles` via tippecanoe |
+| `OVERPASS_ENDPOINT` | (auto) | Force a single Overpass mirror URL if auto-rotation fails |
+| `OVERPASS_ENDPOINTS` | kumi → z → lz4 | Comma-separated mirror order (optional) |
+| `OVERPASS_TIMEOUT` | `1800` | Overpass query timeout in seconds (use `7200` for Sweden) |
 | `MAX_OLD_SPACE_SIZE` | `4096` | Node.js heap size in MB |
 
 ## Output files
@@ -80,7 +107,7 @@ Re-run formatting without re-downloading:
 
 ### Vector tiles
 
-Requires [tippecanoe](https://github.com/felt/tippecanoe) and `tile-join` on your PATH (bundled in the OpenSkiMap processor Docker image).
+Requires [tippecanoe](https://github.com/felt/tippecanoe) and `tile-join` on your PATH, or use Docker (see above).
 
 ```bash
 BBOX="[17.9,59.32,18.05,59.36]" GENERATE_TILES=1 npm run prepare-geojson

@@ -30,7 +30,7 @@ export default async function convertOSMFileToGeoJSON(
   outputFile: string,
 ) {
   const osmJSON = await readOSMJSON(inputFile);
-  writeFeatureCollection(convertOSMToGeoJSON(osmJSON), outputFile);
+  await writeFeatureCollection(convertOSMToGeoJSON(osmJSON), outputFile);
 }
 
 export function convertOSMToGeoJSON(osmJSON: any) {
@@ -61,19 +61,27 @@ async function readOSMJSON(path: string): Promise<any> {
   });
 }
 
-function writeFeatureCollection(geojson: any, path: string) {
-  const outputStream = Fs.createWriteStream(path);
-  const separator = "\n";
+function writeFeatureCollection(
+  geojson: any,
+  path: string,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const outputStream = Fs.createWriteStream(path);
+    const separator = "\n";
 
-  outputStream.write(
-    `{"type": "FeatureCollection",${separator}"features": [${separator}`,
-  );
-  geojson.features.forEach(function (f: any, i: number) {
-    outputStream.write(JSON.stringify(f));
-    if (i !== geojson.features.length - 1) {
-      outputStream.write("," + separator);
-    }
+    outputStream.on("error", reject);
+    outputStream.on("finish", resolve);
+
+    outputStream.write(
+      `{"type": "FeatureCollection",${separator}"features": [${separator}`,
+    );
+    geojson.features.forEach(function (f: any, i: number) {
+      outputStream.write(JSON.stringify(f));
+      if (i !== geojson.features.length - 1) {
+        outputStream.write("," + separator);
+      }
+    });
+    outputStream.write(`${separator}]}${separator}`);
+    outputStream.end();
   });
-  outputStream.write(`${separator}]}${separator}`);
-  outputStream.close();
 }

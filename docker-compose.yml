@@ -1,0 +1,17 @@
+services:
+  processor:
+    build:
+      context: .
+    volumes:
+      - ./data:/app/data
+    environment:
+      BBOX: ${BBOX:-[17.9,59.32,18.05,59.36]}
+      GENERATE_TILES: ${GENERATE_TILES:-1}
+      WORKING_DIR: data
+      OUTPUT_DIR: data
+      MAX_OLD_SPACE_SIZE: ${MAX_OLD_SPACE_SIZE:-4096}
+      OVERPASS_TIMEOUT: ${OVERPASS_TIMEOUT:-1800}
+      BBOX_GRID: ${BBOX_GRID:-}
+      TRAILS_BBOX_GRID: ${TRAILS_BBOX_GRID:-}
+      OVERPASS_GRID_PAUSE_MS: ${OVERPASS_GRID_PAUSE_MS:-90000}
+    command: ["bash", "run.sh"]

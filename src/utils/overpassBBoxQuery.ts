@@ -5,9 +5,13 @@ export default function overpassBBoxQuery(bbox: GeoJSON.BBox | null) {
     return "";
   }
   assert(bbox.length === 4, "Only 2d boxes are supported");
-  return `[bbox:${bbox[1]},${normalizeLongitude(bbox[0])},${bbox[3]},${normalizeLongitude(bbox[2])}]`;
+  return `[bbox:${roundCoord(bbox[1])},${roundCoord(normalizeLongitude(bbox[0]))},${roundCoord(bbox[3])},${roundCoord(normalizeLongitude(bbox[2]))}]`;
 }
 
 function normalizeLongitude(longitude: number) {
   return ((longitude + 180) % 360) - 180;
+}
+
+function roundCoord(value: number) {
+  return Math.round(value * 10000) / 10000;
 }

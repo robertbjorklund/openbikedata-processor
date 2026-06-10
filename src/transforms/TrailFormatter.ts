@@ -43,6 +43,8 @@ export function formatTrail(feature: InputTrailFeature) {
     return [];
   }
 
+  const name = getOSMName(tags, "name");
+
   const { status } = getStatusAndValue("highway", tags as Record<string, string>);
   if (status !== Status.Operating) {
     return [];
@@ -52,7 +54,7 @@ export function formatTrail(feature: InputTrailFeature) {
   const baseProperties: TrailPropsWithoutId = {
     type: FeatureType.Trail,
     category,
-    name: getOSMName(tags, "name"),
+    name,
     ref,
     surface: mapOSMString(tags.surface),
     smoothness: mapOSMString(tags.smoothness),
@@ -69,16 +71,23 @@ export function formatTrail(feature: InputTrailFeature) {
   };
 
   if (feature.geometry.type === "MultiLineString") {
-    return feature.geometry.coordinates.map((lineCoords) => {
-      const geometry: GeoJSON.LineString = {
-        type: "LineString",
-        coordinates: lineCoords,
-      };
-      return buildTrailFeature(geometry, baseProperties);
-    });
+    return feature.geometry.coordinates
+      .map((lineCoords) => {
+        const geometry: GeoJSON.LineString = {
+          type: "LineString",
+          coordinates: lineCoords,
+        };
+        return buildTrailFeature(geometry, baseProperties);
+      })
+      .filter((feature) =>
+        isTrailWorthy(category, feature.properties.lengthMeters, name, ref),
+      );
   }
 
-  return [buildTrailFeature(feature.geometry, baseProperties)];
+  const trail = buildTrailFeature(feature.geometry, baseProperties);
+  return isTrailWorthy(category, trail.properties.lengthMeters, name, ref)
+    ? [trail]
+    : [];
 }
 
 function buildTrailFeature(
@@ -106,33 +115,45 @@ export function getTrailCategory(tags: OSMTrailTags): TrailCategory | null {
     return TrailCategory.MtbTrail;
   }
 
-  if (tags.highway === "cycleway" || hasDedicatedCycleway(tags)) {
+  if (tags.highway === "cycleway") {
     return TrailCategory.Cycleway;
   }
 
-  if (tags.highway === "track") {
+  if (tags.highway === "track" && tags.bicycle === "designated") {
     return TrailCategory.GravelTrack;
   }
 
   if (
-    tags.highway === "path" ||
-    tags.highway === "bridleway" ||
-    tags.highway === "footway" ||
-    tags.highway === "service"
+    (tags.highway === "path" ||
+      tags.highway === "footway" ||
+      tags.highway === "bridleway") &&
+    tags.bicycle === "designated"
   ) {
-    if (tags.bicycle === "designated" || tags.mtb === "yes") {
-      return TrailCategory.MtbTrail;
-    }
     return TrailCategory.SharedPath;
   }
 
   return null;
 }
 
-function hasDedicatedCycleway(tags: OSMTrailTags): boolean {
-  return (
-    (tags.cycleway !== undefined && tags.cycleway !== "no") ||
-    tags["cycleway:lane"] !== undefined ||
-    tags["cycleway:track"] !== undefined
-  );
+const MIN_TRAIL_LENGTH_METERS: Partial<Record<TrailCategory, number>> = {
+  [TrailCategory.SharedPath]: 50,
+  [TrailCategory.GravelTrack]: 100,
+};
+
+function isTrailWorthy(
+  category: TrailCategory,
+  lengthMeters: number | null,
+  name: string | null,
+  ref: string | null,
+): boolean {
+  if (name || ref) {
+    return true;
+  }
+
+  const minLength = MIN_TRAIL_LENGTH_METERS[category];
+  if (minLength === undefined || lengthMeters === null) {
+    return true;
+  }
+
+  return lengthMeters >= minLength;
 }

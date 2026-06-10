@@ -38,6 +38,9 @@
     "check-types": "tsc --project tsconfig.typecheck.json",
     "download": "node --max-old-space-size=4096 dist/scripts/download.js",
     "prepare-geojson": "node --max-old-space-size=4096 dist/scripts/prepare_geojson.js",
-    "extract-tiles": "node dist/scripts/extract_tiles.js"
+    "extract-tiles": "node dist/scripts/extract_tiles.js",
+    "summarize-data": "node dist/scripts/summarize_data.js",
+    "docker:run": "docker compose run --rm processor",
+    "docker:tiles": "docker compose run --rm processor bash run.sh --skip-download"
   }
 }
