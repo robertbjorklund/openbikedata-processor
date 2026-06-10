@@ -1,0 +1,42 @@
+{
+  "name": "openbikedata-processor",
+  "version": "0.1.0",
+  "description": "Data pipeline for processing OpenStreetMap bicycle trail data into OpenBikeMap tiles and GeoJSON",
+  "main": "run.sh",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@turf/boolean-valid": "^7.2.0",
+    "@turf/length": "^7",
+    "merge2": "^1",
+    "object-hash": "^3",
+    "osmtogeojson": "3.0.0-beta.5",
+    "parallel-transform": "^1"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946",
+    "@types/jest": "^29",
+    "@types/merge2": "^1",
+    "@types/node": "^22",
+    "@types/object-hash": "^3",
+    "@types/parallel-transform": "^1",
+    "jest": "^29",
+    "prettier": "^3",
+    "ts-jest": "^29",
+    "tsx": "^4.20.3",
+    "typescript": "^5"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": ["/node_modules/", "/dist/"]
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "format": "prettier --write . --ignore-path .gitignore",
+    "test": "jest",
+    "check-types": "tsc --project tsconfig.typecheck.json",
+    "download": "node --max-old-space-size=4096 dist/scripts/download.js",
+    "prepare-geojson": "node --max-old-space-size=4096 dist/scripts/prepare_geojson.js"
+  }
+}
