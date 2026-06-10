@@ -57,6 +57,8 @@ export interface RouteProperties {
   network: string | null;
   distance: string | null;
   roundtrip: boolean | null;
+  /** Share of relation length on paved surfaces (0–1), from member ways */
+  pavedRatio: number | null;
   status: Status;
   sources: Source[];
 }

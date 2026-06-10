@@ -7,13 +7,13 @@ export interface OSMDownloadConfig {
 
 /**
  * Designated cycling trails only — not every path or street that happens to allow bikes.
+ * Urban cycleways (highway=cycleway) are excluded: they fragment into short segments.
  * See https://wiki.openstreetmap.org/wiki/Key:bicycle
  */
 export const trailsDownloadConfig: OSMDownloadConfig = {
   query: (bbox) => `
     [out:json][timeout:${overpassTimeoutSeconds()}]${overpassBBoxQuery(bbox)};
     (
-      way[highway=cycleway];
       way[highway=path]["bicycle"="designated"]["access"!="private"];
       way[highway=path]["mtb:scale"]["access"!="private"];
       way[highway=track]["bicycle"="designated"]["access"!="private"];

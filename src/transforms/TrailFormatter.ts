@@ -101,6 +101,9 @@ function buildTrailFeature(
 }
 
 function isExcluded(tags: OSMTrailTags): boolean {
+  if (tags.highway === "cycleway") {
+    return true;
+  }
   if (tags.bicycle === "no" || tags.access === "private" || tags.access === "no") {
     return true;
   }
@@ -115,18 +118,15 @@ export function getTrailCategory(tags: OSMTrailTags): TrailCategory | null {
     return TrailCategory.MtbTrail;
   }
 
-  if (tags.highway === "cycleway") {
-    return TrailCategory.Cycleway;
-  }
-
-  if (tags.highway === "track" && tags.bicycle === "designated") {
-    return TrailCategory.GravelTrack;
+  if (
+    (tags.highway === "path" || tags.highway === "track") &&
+    (tags.bicycle === "designated" || tags.mtb === "yes")
+  ) {
+    return TrailCategory.MtbTrail;
   }
 
   if (
-    (tags.highway === "path" ||
-      tags.highway === "footway" ||
-      tags.highway === "bridleway") &&
+    (tags.highway === "footway" || tags.highway === "bridleway") &&
     tags.bicycle === "designated"
   ) {
     return TrailCategory.SharedPath;

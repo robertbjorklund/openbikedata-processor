@@ -6,14 +6,18 @@ import {
 } from "../format";
 import { osmID } from "../features/OSMGeoJSONProperties";
 import { InputRouteFeature } from "../features/RouteFeature";
-import buildFeature from "./FeatureBuilder";
+import { buildFeatureWithId, stableFeatureId } from "./FeatureBuilder";
 import { isValidGeometryInFeature } from "./GeoTransforms";
 import { getOSMName, getOSMRef, mapOSMBoolean, mapOSMString } from "./OSMTransforms";
+import { RouteSurfaceIndex } from "./RouteSurfaceIndex";
 import getStatusAndValue from "./Status";
 
 type RoutePropsWithoutId = Omit<RouteProperties, "id">;
 
-export function formatRoute(feature: InputRouteFeature) {
+export function formatRoute(
+  feature: InputRouteFeature,
+  surfaceIndex: RouteSurfaceIndex = new Map(),
+) {
   if (
     feature.geometry.type !== "LineString" &&
     feature.geometry.type !== "MultiLineString"
@@ -42,19 +46,14 @@ export function formatRoute(feature: InputRouteFeature) {
     network: mapOSMString(tags.network),
     distance: mapOSMString(tags.distance),
     roundtrip: mapOSMBoolean(tags.roundtrip),
+    pavedRatio: surfaceIndex.get(feature.properties.id) ?? null,
     status: status ?? Status.Operating,
     sources: [{ type: SourceType.OPENSTREETMAP, id: osmID(feature.properties) }],
   };
 
-  if (feature.geometry.type === "MultiLineString") {
-    return feature.geometry.coordinates.map((lineCoords) => {
-      const geometry: GeoJSON.LineString = {
-        type: "LineString",
-        coordinates: lineCoords,
-      };
-      return buildFeature(geometry, baseProperties);
-    });
-  }
+  const routeId = stableFeatureId("route", osmID(feature.properties));
 
-  return [buildFeature(feature.geometry, baseProperties)];
+  return [
+    buildFeatureWithId(feature.geometry, baseProperties, routeId),
+  ];
 }

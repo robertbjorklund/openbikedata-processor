@@ -1,9 +1,10 @@
 import {
   FeatureType,
   RouteFeature,
-  TRAIL_CATEGORY_COLORS,
   TrailFeature,
 } from "../format";
+import { trailColor } from "../format/MtbTrailColors";
+import { routePavedColor } from "../format/RoutePavedColors";
 
 export interface MapboxGLTrailProperties {
   id: string;
@@ -22,6 +23,9 @@ export interface MapboxGLRouteProperties {
   ref: string | null;
   network: string | null;
   color: string;
+  pavedRatio: number | null;
+  /** OSM relation/way id for linking (e.g. relation/103925) */
+  osmId: string | null;
 }
 
 export function formatTrailForMapboxGL(
@@ -35,7 +39,7 @@ export function formatTrailForMapboxGL(
       id: properties.id,
       name: properties.name,
       category: properties.category,
-      color: TRAIL_CATEGORY_COLORS[properties.category],
+      color: trailColor(properties.category, properties.mtbScale),
       surface: properties.surface,
       mtbScale: properties.mtbScale,
       lengthMeters: properties.lengthMeters,
@@ -56,24 +60,11 @@ export function formatRouteForMapboxGL(
       name: properties.name,
       ref: properties.ref,
       network: properties.network,
-      color: networkColor(properties.network),
+      color: routePavedColor(properties.pavedRatio),
+      pavedRatio: properties.pavedRatio,
+      osmId: properties.sources[0]?.id ?? null,
     },
   };
-}
-
-function networkColor(network: string | null): string {
-  switch (network) {
-    case "icn":
-      return "#b71c1c";
-    case "ncn":
-      return "#c62828";
-    case "rcn":
-      return "#e65100";
-    case "lcn":
-      return "#2e7d32";
-    default:
-      return "#1565c0";
-  }
 }
 
 export function formatForMapboxGL(
