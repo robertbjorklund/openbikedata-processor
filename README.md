@@ -91,6 +91,10 @@ Re-run formatting without re-downloading:
 | `WORKING_DIR` | `data` | Download and intermediate files |
 | `OUTPUT_DIR` | `WORKING_DIR` | Final GeoJSON output |
 | `GENERATE_TILES` | off | Set to `1` to build `openbikemap.mbtiles` via tippecanoe |
+| `ENABLE_ELEVATION` | off | Set to `1` to enrich trails/routes with DEM elevation profiles |
+| `ELEVATION_SERVER_URL` | Mapzen Terrarium tiles | Tile URL template with `{z}/{x}/{y}` when elevation is enabled |
+| `ELEVATION_SERVER_TILE_ENCODING` | `terrarium` | `terrarium` or `mapbox` terrain RGB encoding |
+| `ELEVATION_SERVER_ZOOM` | `12,13,14` | Comma-separated zoom levels to try |
 | `OVERPASS_ENDPOINT` | (auto) | Force a single Overpass mirror URL if auto-rotation fails |
 | `OVERPASS_ENDPOINTS` | kumi → fr → z → lz4 | Comma-separated mirror order (optional) |
 | `OVERPASS_TIMEOUT` | `1800` | Overpass query timeout in seconds (use `7200` for Sweden) |
@@ -122,9 +126,17 @@ npm run extract-tiles data/openbikemap.mbtiles data/openbikemap
 | [api.openbikemap.org](https://github.com/robertbjorklund/api.openbikemap.org) | REST API |
 | [tiles.openbikemap.org](https://github.com/robertbjorklund/tiles.openbikemap.org) | Tile server and MapLibre styles |
 
+## Elevation profiles
+
+Set `ENABLE_ELEVATION=1` during `prepare-geojson` to sample heights from DEM terrain tiles and attach an `elevationProfile` to each `LineString` trail or route. Full GeoJSON (for the API) includes 3D coordinates; MapboxGL export stays slim.
+
+```bash
+ENABLE_ELEVATION=1 BBOX="[17.9,59.32,18.05,59.36]" npm run prepare-geojson
+```
+
 ## Roadmap
 
-- [ ] Elevation profiles (port from openskidata-processor)
+- [x] Elevation profiles (port from openskidata-processor)
 - [ ] PostgreSQL geocoding cache
 - [ ] Trail network clustering
 - [x] MVT generation via tippecanoe (`GENERATE_TILES=1`)

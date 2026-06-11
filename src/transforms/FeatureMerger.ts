@@ -67,6 +67,7 @@ function mergeTrailGroup(
     type: FeatureType.Trail,
     id: stableFeatureId("trail-group", groupKey),
     lengthMeters: totalLength,
+    elevationProfile: null,
     sources: uniqueSources(segments.flatMap((segment) => segment.properties.sources)),
   };
 

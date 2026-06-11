@@ -29,6 +29,15 @@ export interface Source {
   id: string;
 }
 
+import type { ElevationProfile } from "./ElevationProfile";
+
+export type { ElevationData, ElevationProfile } from "./ElevationProfile";
+export {
+  extractPointsForElevationProfile,
+  getElevationData,
+  getProfileGeometry,
+} from "./ElevationProfile";
+
 export interface TrailProperties {
   type: FeatureType.Trail;
   id: string;
@@ -45,6 +54,7 @@ export interface TrailProperties {
   oneway: boolean | null;
   network: string | null;
   lengthMeters: number | null;
+  elevationProfile: ElevationProfile | null;
   status: Status;
   sources: Source[];
 }
@@ -59,6 +69,7 @@ export interface RouteProperties {
   roundtrip: boolean | null;
   /** Share of relation length on paved surfaces (0–1), from member ways */
   pavedRatio: number | null;
+  elevationProfile: ElevationProfile | null;
   status: Status;
   sources: Source[];
 }

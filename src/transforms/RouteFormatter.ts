@@ -47,6 +47,7 @@ export function formatRoute(
     distance: mapOSMString(tags.distance),
     roundtrip: mapOSMBoolean(tags.roundtrip),
     pavedRatio: surfaceIndex.get(feature.properties.id) ?? null,
+    elevationProfile: null,
     status: status ?? Status.Operating,
     sources: [{ type: SourceType.OPENSTREETMAP, id: osmID(feature.properties) }],
   };

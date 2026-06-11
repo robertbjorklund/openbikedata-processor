@@ -1,39 +1,37 @@
-import overpassBBoxQuery from "../utils/overpassBBoxQuery";
-import overpassTimeoutSeconds from "../utils/overpassTimeout";
-
-export interface OSMDownloadConfig {
-  query: (bbox: GeoJSON.BBox | null) => string;
-}
-
-/**
- * Designated cycling trails only — not every path or street that happens to allow bikes.
- * Urban cycleways (highway=cycleway) are excluded: they fragment into short segments.
- * See https://wiki.openstreetmap.org/wiki/Key:bicycle
- */
-export const trailsDownloadConfig: OSMDownloadConfig = {
-  query: (bbox) => `
-    [out:json][timeout:${overpassTimeoutSeconds()}]${overpassBBoxQuery(bbox)};
-    (
-      way[highway=path]["bicycle"="designated"]["access"!="private"];
-      way[highway=path]["mtb:scale"]["access"!="private"];
-      way[highway=track]["bicycle"="designated"]["access"!="private"];
-      way[highway=track]["mtb:scale"]["access"!="private"];
-      way[highway=footway]["bicycle"="designated"]["access"!="private"];
-      way[highway=bridleway]["bicycle"="designated"]["access"!="private"];
-    );
-    (._; >;);
-    out;
-    `,
-};
-
-/**
- * Signed bicycle route relations (lcn/ncn/rcn/icn and local networks).
- */
-export const routesDownloadConfig: OSMDownloadConfig = {
-  query: (bbox) => `
-    [out:json][timeout:${overpassTimeoutSeconds()}]${overpassBBoxQuery(bbox)};
-    relation[route=bicycle];
-    (._; >;);
-    out;
-    `,
-};
+import overpassBBoxQuery from "../utils/overpassBBoxQuery";
+import overpassTimeoutSeconds from "../utils/overpassTimeout";
+
+export interface OSMDownloadConfig {
+  query: (bbox: GeoJSON.BBox | null) => string;
+}
+
+/**
+ * MTB trails only — not urban cycleways, footways, or generic designated paths.
+ * See https://wiki.openstreetmap.org/wiki/Key:mtb:scale
+ */
+export const trailsDownloadConfig: OSMDownloadConfig = {
+  query: (bbox) => `
+    [out:json][timeout:${overpassTimeoutSeconds()}]${overpassBBoxQuery(bbox)};
+    (
+      way[highway=path]["mtb:scale"]["access"!="private"];
+      way[highway=path]["mtb"="yes"]["access"!="private"];
+      way[highway=track]["mtb:scale"]["access"!="private"];
+      way[highway=track]["mtb"="yes"]["access"!="private"];
+    );
+    (._; >;);
+    out;
+    `,
+};
+
+/**
+ * Signed bicycle route relations (lcn/ncn/rcn/icn and local networks).
+ */
+export const routesDownloadConfig: OSMDownloadConfig = {
+  query: (bbox) => `
+    [out:json][timeout:${overpassTimeoutSeconds()}]${overpassBBoxQuery(bbox)};
+    relation[route=bicycle];
+    (._; >;);
+    out;
+    `,
+};
+

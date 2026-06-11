@@ -7,6 +7,7 @@ services:
     environment:
       BBOX: ${BBOX:-[17.9,59.32,18.05,59.36]}
       GENERATE_TILES: ${GENERATE_TILES:-1}
+      ENABLE_ELEVATION: ${ENABLE_ELEVATION:-0}
       WORKING_DIR: data
       OUTPUT_DIR: data
       MAX_OLD_SPACE_SIZE: ${MAX_OLD_SPACE_SIZE:-4096}

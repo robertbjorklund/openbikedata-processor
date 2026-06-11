@@ -6,11 +6,16 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@turf/boolean-valid": "^7.2.0",
+    "@turf/distance": "^7.3.2",
     "@turf/length": "^7",
+    "@turf/line-chunk": "^7.3.2",
+    "dataloader": "^2.2.3",
     "merge2": "^1",
+    "ngeohash": "^0.6.3",
     "object-hash": "^3",
     "osmtogeojson": "3.0.0-beta.5",
-    "parallel-transform": "^1"
+    "parallel-transform": "^1",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/geojson": "^7946",
