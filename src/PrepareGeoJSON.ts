@@ -4,7 +4,7 @@ import { pipeline } from "stream/promises";
 
 import { Config } from "./Config";
 
-import { TrailFeature } from "./format";
+import { RouteFeature, TrailFeature } from "./format";
 
 import { InputRouteFeature } from "./features/RouteFeature";
 
@@ -22,7 +22,10 @@ import {
 
 import { readGeoJSONFeatures } from "./io/GeoJSONReader";
 
-import { mergeTrailsByGroup } from "./transforms/FeatureMerger";
+import {
+  mergeRoutesByGroup,
+  mergeTrailsByGroup,
+} from "./transforms/FeatureMerger";
 
 import toFeatureCollection from "./transforms/FeatureCollection";
 
@@ -105,6 +108,8 @@ export default async function prepare(paths: DataPaths, config: Config) {
         formatRoute(feature as InputRouteFeature, routeSurfaceIndex),
 
     );
+
+    await mergeRouteGroupsInFile(paths.output.routes);
 
     await enhanceFeaturesInFile(
 
@@ -223,6 +228,24 @@ async function mergeTrailGroupsInFile(path: string) {
   console.log(
 
     `Merged trails by name/category: ${trails.length} → ${merged.length} features`,
+
+  );
+
+}
+
+
+
+async function mergeRouteGroupsInFile(path: string) {
+
+  const routes = (await readAllFeatures(path)) as RouteFeature[];
+
+  const merged = mergeRoutesByGroup(routes);
+
+  await writeFeatureCollection(path, merged);
+
+  console.log(
+
+    `Merged routes by name/ref: ${routes.length} → ${merged.length} features`,
 
   );
 

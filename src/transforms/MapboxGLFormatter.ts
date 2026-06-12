@@ -4,7 +4,7 @@ import {
   TrailFeature,
 } from "../format";
 import { trailColor } from "../format/MtbTrailColors";
-import { routePavedColor } from "../format/RoutePavedColors";
+import { routeNetworkColor } from "../format/RouteNetworkColors";
 
 export interface MapboxGLTrailProperties {
   id: string;
@@ -60,7 +60,7 @@ export function formatRouteForMapboxGL(
       name: properties.name,
       ref: properties.ref,
       network: properties.network,
-      color: routePavedColor(properties.pavedRatio),
+      color: routeNetworkColor(properties.network),
       pavedRatio: properties.pavedRatio,
       osmId: properties.sources[0]?.id ?? null,
     },

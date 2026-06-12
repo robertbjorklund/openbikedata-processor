@@ -1,6 +1,8 @@
 import length from "@turf/length";
 import {
   FeatureType,
+  RouteFeature,
+  RouteProperties,
   Source,
   TrailFeature,
   TrailProperties,
@@ -76,6 +78,158 @@ function mergeTrailGroup(
     geometry,
     properties,
   };
+}
+
+function normalizeRouteName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .trim();
+}
+
+/** Link keys used to connect route segments (name and/or ref). */
+export function getRouteLinkKeys(properties: RouteProperties): string[] {
+  const keys: string[] = [];
+  if (properties.name?.trim()) {
+    const normalized = normalizeRouteName(properties.name);
+    if (normalized) {
+      keys.push(`name:${normalized}`);
+    }
+  }
+  if (properties.ref?.trim()) {
+    const normalizedRef = normalizeRouteName(properties.ref) || properties.ref.trim();
+    keys.push(`ref:${normalizedRef}`);
+  }
+  return keys;
+}
+
+export function getRouteGroupKey(properties: RouteProperties): string | null {
+  const keys = getRouteLinkKeys(properties);
+  return keys.find((key) => key.startsWith("name:")) ?? keys[0] ?? null;
+}
+
+class UnionFind {
+  private parent: number[];
+
+  constructor(size: number) {
+    this.parent = Array.from({ length: size }, (_, index) => index);
+  }
+
+  find(index: number): number {
+    if (this.parent[index] !== index) {
+      this.parent[index] = this.find(this.parent[index]);
+    }
+    return this.parent[index];
+  }
+
+  union(a: number, b: number): void {
+    const rootA = this.find(a);
+    const rootB = this.find(b);
+    if (rootA !== rootB) {
+      this.parent[rootA] = rootB;
+    }
+  }
+}
+
+function routeGeometryMeters(feature: RouteFeature): number {
+  return length(
+    { type: "Feature", properties: {}, geometry: feature.geometry },
+    { units: "meters" },
+  );
+}
+
+function mergeRouteGroup(
+  groupKey: string,
+  segments: RouteFeature[],
+): RouteFeature {
+  const lines = segments.flatMap((segment) => geometryToLines(segment.geometry));
+  const geometry = linesToGeometry(lines);
+
+  const primary = segments.reduce((best, segment) =>
+    routeGeometryMeters(segment) > routeGeometryMeters(best) ? segment : best,
+  );
+
+  const properties: RouteProperties = {
+    ...primary.properties,
+    type: FeatureType.Route,
+    id: stableFeatureId("route-group", groupKey),
+    sources: uniqueSources(
+      segments.flatMap((segment) => segment.properties.sources),
+    ),
+  };
+
+  return {
+    type: "Feature",
+    geometry,
+    properties,
+  };
+}
+
+export function mergeRoutesByGroup(features: RouteFeature[]): RouteFeature[] {
+  const ungrouped: RouteFeature[] = [];
+  const groupable: { feature: RouteFeature; keys: string[] }[] = [];
+
+  for (const feature of features) {
+    const keys = getRouteLinkKeys(feature.properties);
+    if (keys.length === 0) {
+      ungrouped.push(feature);
+      continue;
+    }
+    groupable.push({ feature, keys });
+  }
+
+  if (groupable.length === 0) {
+    return ungrouped;
+  }
+
+  const unionFind = new UnionFind(groupable.length);
+  const keyToIndex = new Map<string, number>();
+
+  for (let index = 0; index < groupable.length; index++) {
+    for (const key of groupable[index].keys) {
+      const existing = keyToIndex.get(key);
+      if (existing !== undefined) {
+        unionFind.union(index, existing);
+      } else {
+        keyToIndex.set(key, index);
+      }
+    }
+  }
+
+  const components = new Map<
+    number,
+    { features: RouteFeature[]; keys: Set<string> }
+  >();
+
+  for (let index = 0; index < groupable.length; index++) {
+    const root = unionFind.find(index);
+    const component = components.get(root) ?? {
+      features: [],
+      keys: new Set<string>(),
+    };
+    component.features.push(groupable[index].feature);
+    for (const key of groupable[index].keys) {
+      component.keys.add(key);
+    }
+    components.set(root, component);
+  }
+
+  const merged: RouteFeature[] = [...ungrouped];
+  for (const { features: segments, keys } of components.values()) {
+    const uniqueSegments = [
+      ...new Map(segments.map((segment) => [segment.properties.id, segment]))
+        .values(),
+    ];
+    if (uniqueSegments.length === 1) {
+      merged.push(uniqueSegments[0]);
+      continue;
+    }
+    const groupKey = [...keys].sort().join("|");
+    merged.push(mergeRouteGroup(groupKey, uniqueSegments));
+  }
+
+  return merged;
 }
 
 export function mergeTrailsByGroup(features: TrailFeature[]): TrailFeature[] {
