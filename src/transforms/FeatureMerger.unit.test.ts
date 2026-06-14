@@ -30,6 +30,7 @@ function trail(
     properties: {
       type: FeatureType.Trail,
       id,
+      groupId: null,
       category: TrailCategory.MtbTrail,
       name,
       ref: null,
@@ -37,6 +38,7 @@ function trail(
       smoothness: null,
       tracktype: null,
       mtbScale: 2,
+      mtbScaleImba: null,
       sacScale: null,
       bicycle: null,
       lit: false,
@@ -82,6 +84,7 @@ function route(
   name: string | null,
   ref: string | null,
   coords: GeoJSON.Position[][],
+  network = "lcn",
 ): RouteFeature {
   const geometry =
     coords.length === 1
@@ -94,9 +97,14 @@ function route(
     properties: {
       type: FeatureType.Route,
       id,
+      groupId: null,
+      stageId: null,
       name,
       ref,
-      network: "lcn",
+      from: null,
+      to: null,
+      via: null,
+      network,
       distance: null,
       roundtrip: null,
       pavedRatio: null,
@@ -133,18 +141,36 @@ describe("mergeRoutesByGroup", () => {
     expect(features[0].geometry.type).toBe("MultiLineString");
   });
 
-  it("groups named and ref-only segments that share ref", () => {
+  it("groups named and ref-only segments that share ref on national routes", () => {
     const features = mergeRoutesByGroup([
-      route("a", "Kustlinjen", "29", [[[0, 0], [1, 1]]]),
-      route("b", null, "29", [[[2, 2], [3, 3]]]),
-      route("c", "Unrelated", "99", [[[4, 4], [5, 5]]]),
+      route("a", "Sverigeleden", "18", [[[0, 0], [1, 1]]], "ncn"),
+      route("b", null, "18", [[[2, 2], [3, 3]]], "ncn"),
+      route("c", "Unrelated", "99", [[[4, 4], [5, 5]]], "ncn"),
     ]);
 
     expect(features).toHaveLength(2);
-    const grouped = features.find((feature) => feature.properties.ref === "29");
+    const grouped = features.find((feature) => feature.properties.ref === "18");
     expect(grouped?.geometry.type).toBe("MultiLineString");
     expect(grouped?.properties.sources).toHaveLength(2);
-    expect(grouped?.properties.id).not.toBe("a");
+  });
+
+  it("does not group routes that share ref in different networks", () => {
+    const features = mergeRoutesByGroup([
+      route("a", "Sverigeleden (18)", "18", [[[0, 0], [1, 1]]], "ncn"),
+      route("b", "Bicycle Route", "18", [[[2, 2], [3, 3]]], "lcn"),
+      route("c", "Huddinge cykelturnät", "18", [[[4, 4], [5, 5]]], "lcn"),
+    ]);
+
+    expect(features).toHaveLength(3);
+  });
+
+  it("does not group generic route names", () => {
+    const features = mergeRoutesByGroup([
+      route("a", "Bicycle Route", null, [[[0, 0], [1, 1]]]),
+      route("b", "Bicycle Route", null, [[[2, 2], [3, 3]]]),
+    ]);
+
+    expect(features).toHaveLength(2);
   });
 });
 
@@ -154,8 +180,13 @@ describe("getRouteGroupKey", () => {
       getRouteGroupKey({
         type: FeatureType.Route,
         id: "x",
+        groupId: null,
+        stageId: null,
         name: "Kustlinjen (29)",
         ref: null,
+        from: null,
+        to: null,
+        via: null,
         network: "lcn",
         distance: null,
         roundtrip: null,
@@ -174,6 +205,7 @@ describe("getTrailGroupKey", () => {
       getTrailGroupKey({
         type: FeatureType.Trail,
         id: "x",
+        groupId: null,
         category: TrailCategory.MtbTrail,
         name: "Test",
         ref: null,
@@ -181,6 +213,7 @@ describe("getTrailGroupKey", () => {
         smoothness: null,
         tracktype: null,
         mtbScale: null,
+        mtbScaleImba: null,
         sacScale: null,
         bicycle: null,
         lit: null,

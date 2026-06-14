@@ -41,6 +41,8 @@ export {
 export interface TrailProperties {
   type: FeatureType.Trail;
   id: string;
+  /** Stable id for all segments of the same logical trail (name/ref group). */
+  groupId: string | null;
   category: TrailCategory;
   name: string | null;
   ref: string | null;
@@ -48,6 +50,8 @@ export interface TrailProperties {
   smoothness: string | null;
   tracktype: string | null;
   mtbScale: number | null;
+  /** IMBA difficulty 0–4 from mtb:scale:imba */
+  mtbScaleImba: number | null;
   sacScale: string | null;
   bicycle: string | null;
   lit: boolean | null;
@@ -62,8 +66,15 @@ export interface TrailProperties {
 export interface RouteProperties {
   type: FeatureType.Route;
   id: string;
+  /** Stable id for all segments of the same logical route (name/ref group). */
+  groupId: string | null;
+  /** One OSM route relation — a selectable stage within a group (e.g. Kustlinjen etapp). */
+  stageId: string | null;
   name: string | null;
   ref: string | null;
+  from: string | null;
+  to: string | null;
+  via: string | null;
   network: string | null;
   distance: string | null;
   roundtrip: boolean | null;

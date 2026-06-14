@@ -23,6 +23,12 @@ import {
 import { readGeoJSONFeatures } from "./io/GeoJSONReader";
 
 import {
+  assignRouteGroupIds,
+  assignTrailGroupIds,
+} from "./transforms/AssignFeatureGroupIds";
+import combineRouteSegments from "./transforms/normalization/CombineRouteSegments";
+import combineTrailSegments from "./transforms/normalization/CombineTrailSegments";
+import {
   mergeRoutesByGroup,
   mergeTrailsByGroup,
 } from "./transforms/FeatureMerger";
@@ -71,6 +77,10 @@ export default async function prepare(paths: DataPaths, config: Config) {
 
     await mergeTrailGroupsInFile(paths.output.trails);
 
+    await combineTrailSegmentsInFile(paths.output.trails);
+
+    await assignTrailGroupIdsInFile(paths.output.trails);
+
     await enhanceFeaturesInFile(
 
       paths.output.trails,
@@ -109,7 +119,9 @@ export default async function prepare(paths: DataPaths, config: Config) {
 
     );
 
-    await mergeRouteGroupsInFile(paths.output.routes);
+    await combineRouteSegmentsInFile(paths.output.routes);
+
+    await assignRouteGroupIdsInFile(paths.output.routes);
 
     await enhanceFeaturesInFile(
 
@@ -235,6 +247,38 @@ async function mergeTrailGroupsInFile(path: string) {
 
 
 
+async function combineTrailSegmentsInFile(path: string) {
+
+  const trails = (await readAllFeatures(path)) as TrailFeature[];
+
+  const combined = combineTrailSegments(trails);
+
+  await writeFeatureCollection(path, combined);
+
+  console.log(
+
+    `Combined connected trail segments: ${trails.length} → ${combined.length} features`,
+
+  );
+
+}
+
+
+
+async function assignTrailGroupIdsInFile(path: string) {
+
+  const trails = (await readAllFeatures(path)) as TrailFeature[];
+
+  const withGroupIds = assignTrailGroupIds(trails);
+
+  await writeFeatureCollection(path, withGroupIds);
+
+  console.log(`Assigned trail groupId to ${withGroupIds.length} features`);
+
+}
+
+
+
 async function mergeRouteGroupsInFile(path: string) {
 
   const routes = (await readAllFeatures(path)) as RouteFeature[];
@@ -248,6 +292,38 @@ async function mergeRouteGroupsInFile(path: string) {
     `Merged routes by name/ref: ${routes.length} → ${merged.length} features`,
 
   );
+
+}
+
+
+
+async function combineRouteSegmentsInFile(path: string) {
+
+  const routes = (await readAllFeatures(path)) as RouteFeature[];
+
+  const combined = combineRouteSegments(routes);
+
+  await writeFeatureCollection(path, combined);
+
+  console.log(
+
+    `Combined connected route segments: ${routes.length} → ${combined.length} features`,
+
+  );
+
+}
+
+
+
+async function assignRouteGroupIdsInFile(path: string) {
+
+  const routes = (await readAllFeatures(path)) as RouteFeature[];
+
+  const withGroupIds = assignRouteGroupIds(routes);
+
+  await writeFeatureCollection(path, withGroupIds);
+
+  console.log(`Assigned route groupId to ${withGroupIds.length} features`);
 
 }
 

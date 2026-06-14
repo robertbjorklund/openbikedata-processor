@@ -40,7 +40,7 @@ import getStatusAndValue from "./Status";
 
 
 
-type TrailPropsWithoutId = Omit<TrailProperties, "id">;
+type TrailPropsWithoutId = Omit<TrailProperties, "id" | "groupId">;
 
 
 
@@ -127,6 +127,7 @@ export function formatTrail(feature: InputTrailFeature) {
     tracktype: mapOSMString(tags.tracktype),
 
     mtbScale: mapOSMNumber(tags["mtb:scale"]),
+    mtbScaleImba: mapOSMNumber(tags["mtb:scale:imba"]),
 
     sacScale: mapOSMString(tags.sac_scale),
 
@@ -204,7 +205,7 @@ function buildTrailFeature(
 
   );
 
-  return buildFeature(geometry, { ...properties, lengthMeters });
+  return buildFeature(geometry, { ...properties, lengthMeters, groupId: null });
 
 }
 
@@ -251,31 +252,18 @@ function isExcluded(tags: OSMTrailTags): boolean {
 
 
 export function getTrailCategory(tags: OSMTrailTags): TrailCategory | null {
-
-  if (tags["mtb:scale"] !== undefined) {
-
+  if (tags["mtb:scale"] !== undefined || tags["mtb:scale:imba"] !== undefined) {
     return TrailCategory.MtbTrail;
-
   }
-
-
 
   if (
-
     (tags.highway === "path" || tags.highway === "track") &&
-
     tags.mtb === "yes"
-
   ) {
-
     return TrailCategory.MtbTrail;
-
   }
 
-
-
   return null;
-
 }
 
 

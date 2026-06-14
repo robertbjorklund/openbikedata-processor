@@ -9,6 +9,8 @@ export interface OSMTrailTags {
   foot?: string;
   mtb?: string;
   "mtb:scale"?: string;
+  "mtb:scale:imba"?: string;
+  "mtb:type"?: string;
   sac_scale?: string;
   surface?: string;
   smoothness?: string;

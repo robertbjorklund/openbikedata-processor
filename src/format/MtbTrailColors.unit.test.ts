@@ -3,6 +3,7 @@ import {
   mtbTrailColor,
   trailColor,
   MTB_TRAIL_COLOR_BLACK,
+  MTB_TRAIL_COLOR_ORANGE,
   MTB_TRAIL_COLOR_BLUE,
   MTB_TRAIL_COLOR_GREEN,
   MTB_TRAIL_COLOR_RED,
@@ -23,9 +24,10 @@ describe("mtbTrailColor", () => {
     expect(mtbTrailColor(3)).toBe(MTB_TRAIL_COLOR_RED);
   });
 
-  it("maps S4 and above to black", () => {
+  it("maps S4 to black and S5+ to orange", () => {
     expect(mtbTrailColor(4)).toBe(MTB_TRAIL_COLOR_BLACK);
-    expect(mtbTrailColor(6)).toBe(MTB_TRAIL_COLOR_BLACK);
+    expect(mtbTrailColor(5)).toBe(MTB_TRAIL_COLOR_ORANGE);
+    expect(mtbTrailColor(6)).toBe(MTB_TRAIL_COLOR_ORANGE);
   });
 
   it("maps missing scale to other purple", () => {

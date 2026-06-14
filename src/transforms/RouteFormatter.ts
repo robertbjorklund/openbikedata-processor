@@ -12,7 +12,7 @@ import { getOSMName, getOSMRef, mapOSMBoolean, mapOSMString } from "./OSMTransfo
 import { RouteSurfaceIndex } from "./RouteSurfaceIndex";
 import getStatusAndValue from "./Status";
 
-type RoutePropsWithoutId = Omit<RouteProperties, "id">;
+type RoutePropsWithoutId = Omit<RouteProperties, "id" | "groupId" | "stageId">;
 
 export function formatRoute(
   feature: InputRouteFeature,
@@ -39,10 +39,16 @@ export function formatRoute(
     return [];
   }
 
+  const osmRelationId = osmID(feature.properties);
+  const stageId = stableFeatureId("route-stage", osmRelationId);
+
   const baseProperties: RoutePropsWithoutId = {
     type: FeatureType.Route,
     name: getOSMName(tags, "name"),
     ref: getOSMRef(tags),
+    from: mapOSMString(tags.from),
+    to: mapOSMString(tags.to),
+    via: mapOSMString(tags.via),
     network: mapOSMString(tags.network),
     distance: mapOSMString(tags.distance),
     roundtrip: mapOSMBoolean(tags.roundtrip),
@@ -55,6 +61,10 @@ export function formatRoute(
   const routeId = stableFeatureId("route", osmID(feature.properties));
 
   return [
-    buildFeatureWithId(feature.geometry, baseProperties, routeId),
+    buildFeatureWithId(
+      feature.geometry,
+      { ...baseProperties, groupId: null, stageId },
+      routeId,
+    ),
   ];
 }

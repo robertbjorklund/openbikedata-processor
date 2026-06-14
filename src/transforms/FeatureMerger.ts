@@ -68,6 +68,7 @@ function mergeTrailGroup(
     ...primary.properties,
     type: FeatureType.Trail,
     id: stableFeatureId("trail-group", groupKey),
+    groupId: null,
     lengthMeters: totalLength,
     elevationProfile: null,
     sources: uniqueSources(segments.flatMap((segment) => segment.properties.sources)),
@@ -88,19 +89,52 @@ function normalizeRouteName(name: string): string {
     .trim();
 }
 
+const GENERIC_ROUTE_NAMES = new Set([
+  "bicycle route",
+  "bike route",
+  "cycle route",
+  "cykelled",
+  "cykelväg",
+  "cykelbana",
+]);
+
+export function isGenericRouteName(name: string): boolean {
+  return GENERIC_ROUTE_NAMES.has(normalizeRouteName(name));
+}
+
+function routeNetworkKey(network: string | null | undefined): string {
+  return network?.trim().toLowerCase() || "none";
+}
+
 /** Link keys used to connect route segments (name and/or ref). */
 export function getRouteLinkKeys(properties: RouteProperties): string[] {
   const keys: string[] = [];
-  if (properties.name?.trim()) {
-    const normalized = normalizeRouteName(properties.name);
-    if (normalized) {
-      keys.push(`name:${normalized}`);
+  const network = routeNetworkKey(properties.network);
+  const normalizedName = properties.name?.trim()
+    ? normalizeRouteName(properties.name)
+    : null;
+  const hasDistinctName =
+    normalizedName !== null &&
+    normalizedName.length > 0 &&
+    !isGenericRouteName(properties.name!);
+
+  if (hasDistinctName && normalizedName) {
+    keys.push(`name:${normalizedName}`);
+  }
+
+  if (properties.ref?.trim()) {
+    const normalizedRef =
+      normalizeRouteName(properties.ref) || properties.ref.trim().toLowerCase();
+    const refBase = `ref:${network}:${normalizedRef}`;
+    if (network === "icn" || network === "ncn") {
+      keys.push(refBase);
+    } else if (hasDistinctName && normalizedName) {
+      keys.push(`${refBase}:${normalizedName}`);
+    } else {
+      keys.push(refBase);
     }
   }
-  if (properties.ref?.trim()) {
-    const normalizedRef = normalizeRouteName(properties.ref) || properties.ref.trim();
-    keys.push(`ref:${normalizedRef}`);
-  }
+
   return keys;
 }
 
@@ -154,6 +188,7 @@ function mergeRouteGroup(
     ...primary.properties,
     type: FeatureType.Route,
     id: stableFeatureId("route-group", groupKey),
+    groupId: null,
     sources: uniqueSources(
       segments.flatMap((segment) => segment.properties.sources),
     ),
