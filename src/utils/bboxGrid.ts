@@ -31,15 +31,22 @@ function parseGridCell(value: unknown, index: number): BboxGridCell {
   };
 }
 
-export async function bboxGridFromEnvironment(): Promise<BboxGridCell[] | null> {
-  const gridPath = process.env.BBOX_GRID ?? process.env.TRAILS_BBOX_GRID;
+/** Grid for MTB trail Overpass downloads only (routes use the region BBOX). */
+export async function trailsGridFromEnvironment(): Promise<BboxGridCell[] | null> {
+  const gridPath = process.env.TRAILS_BBOX_GRID ?? process.env.BBOX_GRID;
   if (!gridPath) {
     return null;
   }
 
   const raw = await readFile(gridPath, "utf-8");
   const parsed: unknown = JSON.parse(raw);
-  assert(Array.isArray(parsed) && parsed.length > 0, "BBOX_GRID must be a non-empty array");
+  assert(
+    Array.isArray(parsed) && parsed.length > 0,
+    "TRAILS_BBOX_GRID must be a non-empty array",
+  );
 
   return parsed.map(parseGridCell);
 }
+
+/** @deprecated Use trailsGridFromEnvironment */
+export const bboxGridFromEnvironment = trailsGridFromEnvironment;

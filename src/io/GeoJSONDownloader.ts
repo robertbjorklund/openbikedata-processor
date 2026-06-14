@@ -1,8 +1,9 @@
+import { strict as assert } from "assert";
 import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import { BboxGridCell, bboxGridFromEnvironment } from "../utils/bboxGrid";
+import { BboxGridCell, trailsGridFromEnvironment } from "../utils/bboxGrid";
 import {
   OSMDownloadConfig,
   routesDownloadConfig,
@@ -33,10 +34,18 @@ export default async function downloadAndConvertToGeoJSON(
   const paths = new InputDataPaths(folder);
 
   console.log("Phase 1: Downloading OSM data...");
-  const grid = await bboxGridFromEnvironment();
-  if (grid) {
-    await downloadLayerInGrid("trails", trailsDownloadConfig, grid, paths);
-    await downloadLayerInGrid("routes", routesDownloadConfig, grid, paths);
+  const trailsGrid = await trailsGridFromEnvironment();
+  if (trailsGrid) {
+    assert(
+      bbox !== null,
+      "BBOX must be set when TRAILS_BBOX_GRID (or BBOX_GRID) is used — routes download the full region in one query",
+    );
+    console.log(
+      `Trails: downloading ${trailsGrid.length} grid cells; routes: single query for region bbox ${JSON.stringify(bbox)}`,
+    );
+    await downloadLayerInGrid("trails", trailsDownloadConfig, trailsGrid, paths);
+    await downloadOSMJSON(routesDownloadConfig, paths.osmJSON.routes, bbox);
+    await convertOSMFileToGeoJSON(paths.osmJSON.routes, paths.geoJSON.routes);
   } else {
     await downloadOSMJSON(trailsDownloadConfig, paths.osmJSON.trails, bbox);
     await convertOSMFileToGeoJSON(paths.osmJSON.trails, paths.geoJSON.trails);
