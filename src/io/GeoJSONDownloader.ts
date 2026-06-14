@@ -1,9 +1,9 @@
-import { strict as assert } from "assert";
 import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 import { BboxGridCell, trailsGridFromEnvironment } from "../utils/bboxGrid";
+import { dedupeOsmFeatures } from "../utils/dedupeOsmFeatures";
 import {
   OSMDownloadConfig,
   routesDownloadConfig,
@@ -19,12 +19,12 @@ enum OSMEndpoint {
   FR = "https://overpass.openstreetmap.fr/api/interpreter",
 }
 
-/** Tried in order; spread load across public mirrors. */
+/** Tried in order; spread load across public mirrors (FR/Z tend to be more reliable than KUMI). */
 const OVERPASS_ENDPOINTS = [
-  OSMEndpoint.KUMI,
   OSMEndpoint.FR,
   OSMEndpoint.Z,
   OSMEndpoint.LZ4,
+  OSMEndpoint.KUMI,
 ];
 
 export default async function downloadAndConvertToGeoJSON(
@@ -36,16 +36,13 @@ export default async function downloadAndConvertToGeoJSON(
   console.log("Phase 1: Downloading OSM data...");
   const trailsGrid = await trailsGridFromEnvironment();
   if (trailsGrid) {
-    assert(
-      bbox !== null,
-      "BBOX must be set when TRAILS_BBOX_GRID (or BBOX_GRID) is used — routes download the full region in one query",
-    );
     console.log(
-      `Trails: downloading ${trailsGrid.length} grid cells; routes: single query for region bbox ${JSON.stringify(bbox)}`,
+      `Trails and routes: downloading ${trailsGrid.length} grid cells each (routes deduped by OSM id).`,
     );
     await downloadLayerInGrid("trails", trailsDownloadConfig, trailsGrid, paths);
-    await downloadOSMJSON(routesDownloadConfig, paths.osmJSON.routes, bbox);
-    await convertOSMFileToGeoJSON(paths.osmJSON.routes, paths.geoJSON.routes);
+    await downloadLayerInGrid("routes", routesDownloadConfig, trailsGrid, paths, {
+      dedupeByOsmId: true,
+    });
   } else {
     await downloadOSMJSON(trailsDownloadConfig, paths.osmJSON.trails, bbox);
     await convertOSMFileToGeoJSON(paths.osmJSON.trails, paths.geoJSON.trails);
@@ -65,9 +62,10 @@ async function downloadLayerInGrid(
   config: OSMDownloadConfig,
   grid: BboxGridCell[],
   paths: InputDataPaths,
+  options?: { dedupeByOsmId?: boolean },
 ): Promise<void> {
   const tempDir = await mkdtemp(join(tmpdir(), `openbikedata-${layer}-`));
-  const features: GeoJSON.Feature[] = [];
+  let features: GeoJSON.Feature[] = [];
   const geoPath = paths.geoJSON[layer];
   const osmPath = paths.osmJSON[layer];
 
@@ -96,6 +94,14 @@ async function downloadLayerInGrid(
         console.log(`Waiting ${pauseMs / 1000}s before next grid cell...`);
         await sleep(pauseMs);
       }
+    }
+
+    if (options?.dedupeByOsmId) {
+      const before = features.length;
+      features = dedupeOsmFeatures(features);
+      console.log(
+        `Deduped ${layer}: ${before} -> ${features.length} features by OSM id.`,
+      );
     }
 
     await writeFile(

@@ -32,7 +32,7 @@ OpenBikeMap separates **MTB trails** and **signed bicycle routes**. Urban cyclew
 
 The Overpass download and `TrailFormatter` both exclude `highway=cycleway`, footways, bridleways, and paths tagged only with `bicycle=designated`. Unnamed MTB fragments shorter than 200 m are dropped unless they have a name or ref.
 
-When `TRAILS_BBOX_GRID` is set, **trails** are downloaded cell-by-cell (Overpass-friendly) while **bicycle routes** use a single query for the region `BBOX` (complete route relations without cell duplicates).
+When `TRAILS_BBOX_GRID` is set, **trails and bicycle routes** are downloaded cell-by-cell (Overpass-friendly). Route relations that span cells are deduplicated by OSM id.
 
 Signed route geometry may pass through urban streets when the official route does — that is intentional and distinct from importing every local cycle path.
 
@@ -97,9 +97,9 @@ Re-run formatting without re-downloading:
 | `ELEVATION_SERVER_TILE_ENCODING` | `terrarium` | `terrarium` or `mapbox` terrain RGB encoding |
 | `ELEVATION_SERVER_ZOOM` | `12,13,14` | Comma-separated zoom levels to try |
 | `OVERPASS_ENDPOINT` | (auto) | Force a single Overpass mirror URL if auto-rotation fails |
-| `OVERPASS_ENDPOINTS` | kumi → fr → z → lz4 | Comma-separated mirror order (optional) |
+| `OVERPASS_ENDPOINTS` | fr → z → lz4 → kumi | Comma-separated mirror order (optional) |
 | `OVERPASS_TIMEOUT` | `1800` | Overpass query timeout in seconds (use `7200` for Sweden) |
-| `TRAILS_BBOX_GRID` | — | Path to JSON grid for **MTB trail** Overpass downloads (routes still use `BBOX`) |
+| `TRAILS_BBOX_GRID` | — | Path to JSON grid for **trail and route** Overpass downloads (routes deduped by OSM id) |
 | `BBOX_GRID` | — | Deprecated alias for `TRAILS_BBOX_GRID` |
 | `OVERPASS_GRID_PAUSE_MS` | `90000` | Pause between trail grid cells (ms) |
 | `MAX_OLD_SPACE_SIZE` | `4096` | Node.js heap size in MB |

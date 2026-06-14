@@ -31,7 +31,7 @@ function parseGridCell(value: unknown, index: number): BboxGridCell {
   };
 }
 
-/** Grid for MTB trail Overpass downloads only (routes use the region BBOX). */
+/** Grid for Overpass downloads (trails and routes when TRAILS_BBOX_GRID is set). */
 export async function trailsGridFromEnvironment(): Promise<BboxGridCell[] | null> {
   const gridPath = process.env.TRAILS_BBOX_GRID ?? process.env.BBOX_GRID;
   if (!gridPath) {
