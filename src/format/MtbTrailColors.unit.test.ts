@@ -1,7 +1,5 @@
-import { TrailCategory } from "./index";
 import {
   mtbTrailColor,
-  trailColor,
   MTB_TRAIL_COLOR_BLACK,
   MTB_TRAIL_COLOR_ORANGE,
   MTB_TRAIL_COLOR_BLUE,
@@ -32,12 +30,5 @@ describe("mtbTrailColor", () => {
 
   it("maps missing scale to other purple", () => {
     expect(mtbTrailColor(null)).toBe(TRAIL_COLOR_OTHER);
-  });
-});
-
-describe("trailColor", () => {
-  it("uses purple for non-MTB trail categories", () => {
-    expect(trailColor(TrailCategory.SharedPath, 2)).toBe(TRAIL_COLOR_OTHER);
-    expect(trailColor(TrailCategory.GravelTrack, null)).toBe(TRAIL_COLOR_OTHER);
   });
 });

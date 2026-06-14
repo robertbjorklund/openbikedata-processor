@@ -13,11 +13,7 @@ export enum Status {
 }
 
 export enum TrailCategory {
-  Cycleway = "cycleway",
-  BicycleRoute = "bicycle_route",
   MtbTrail = "mtb_trail",
-  GravelTrack = "gravel_track",
-  SharedPath = "shared_path",
 }
 
 export enum SourceType {
@@ -94,11 +90,3 @@ export type RouteFeature = GeoJSON.Feature<
   GeoJSON.LineString | GeoJSON.MultiLineString,
   RouteProperties
 >;
-
-export const TRAIL_CATEGORY_COLORS: Record<TrailCategory, string> = {
-  [TrailCategory.Cycleway]: "#1565c0",
-  [TrailCategory.BicycleRoute]: "#2e7d32",
-  [TrailCategory.MtbTrail]: "#e65100",
-  [TrailCategory.GravelTrack]: "#6d4c41",
-  [TrailCategory.SharedPath]: "#7b1fa2",
-};

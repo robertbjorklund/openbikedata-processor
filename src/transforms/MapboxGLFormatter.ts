@@ -3,7 +3,7 @@ import {
   RouteFeature,
   TrailFeature,
 } from "../format";
-import { trailColor } from "../format/MtbTrailColors";
+import { mtbTrailColor } from "../format/MtbTrailColors";
 import { routeNetworkColor } from "../format/RouteNetworkColors";
 
 export interface MapboxGLTrailProperties {
@@ -49,7 +49,7 @@ export function formatTrailForMapboxGL(
       groupId: properties.groupId,
       name: properties.name,
       category: properties.category,
-      color: trailColor(properties.category, properties.mtbScale),
+      color: mtbTrailColor(properties.mtbScale),
       surface: properties.surface,
       mtbScale: properties.mtbScale,
       mtbScaleImba: properties.mtbScaleImba,

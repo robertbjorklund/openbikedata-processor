@@ -1,5 +1,3 @@
-import { TrailCategory } from "./index";
-
 export const MTB_TRAIL_COLOR_GREEN = "#2e7d32";
 export const MTB_TRAIL_COLOR_BLUE = "#1565c0";
 export const MTB_TRAIL_COLOR_RED = "#d32f2f";
@@ -25,14 +23,4 @@ export function mtbTrailColor(mtbScale: number | null): string {
     return MTB_TRAIL_COLOR_BLACK;
   }
   return MTB_TRAIL_COLOR_ORANGE;
-}
-
-export function trailColor(
-  category: TrailCategory,
-  mtbScale: number | null,
-): string {
-  if (category !== TrailCategory.MtbTrail) {
-    return TRAIL_COLOR_OTHER;
-  }
-  return mtbTrailColor(mtbScale);
 }

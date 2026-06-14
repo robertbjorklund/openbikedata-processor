@@ -21,19 +21,18 @@ Overpass API (OSM)
   tippecanoe → openbikemap.mbtiles
 ```
 
-## Trail types
+## Trail and route types
 
-We include **designated cycling trails** only — not every street or path that allows bikes.
+OpenBikeMap separates **MTB trails** and **signed bicycle routes**. Urban cycleways, footways, and other generic designated paths are **not** included.
 
-| Category | OSM sources |
-|----------|-------------|
-| **Cycleway** | `highway=cycleway` |
-| **MTB trail** | `mtb:scale` on path/track |
-| **Gravel track** | `highway=track` + `bicycle=designated` |
-| **Shared path** | `highway=path/footway/bridleway` + `bicycle=designated` |
-| **Bicycle route** | `relation[route=bicycle]` (lcn/ncn/rcn/icn) |
+| Layer | OSM sources | Output |
+|-------|-------------|--------|
+| **MTB trails** | `path`/`track` with `mtb:scale`, `mtb:scale:imba`, or `mtb=yes` | `trails` MVT layer |
+| **Bicycle routes** | `relation[route=bicycle]` (LCN, RCN, NCN, ICN, etc.) | `routes` MVT layer |
 
-Unnamed shared paths shorter than 50 m and gravel tracks shorter than 100 m are dropped during formatting.
+The Overpass download and `TrailFormatter` both exclude `highway=cycleway`, footways, bridleways, and paths tagged only with `bicycle=designated`. Unnamed MTB fragments shorter than 200 m are dropped unless they have a name or ref.
+
+Signed route geometry may pass through urban streets when the official route does — that is intentional and distinct from importing every local cycle path.
 
 ## Installation
 
