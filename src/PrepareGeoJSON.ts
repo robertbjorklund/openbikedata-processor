@@ -39,6 +39,7 @@ import { formatForMapboxGL } from "./transforms/MapboxGLFormatter";
 
 import { formatRoute } from "./transforms/RouteFormatter";
 
+import { buildRouteMemberWayIds } from "./transforms/RouteMemberWayIndex";
 import { buildRouteSurfaceIndex } from "./transforms/RouteSurfaceIndex";
 
 import { formatTrail } from "./transforms/TrailFormatter";
@@ -63,16 +64,21 @@ export default async function prepare(paths: DataPaths, config: Config) {
 
   try {
 
+    console.log("Phase 2: Building route member way index...");
+    const routeMemberWayIds = await buildRouteMemberWayIds(
+      paths.input.geoJSON.routes,
+    );
+    console.log(
+      `Indexed ${routeMemberWayIds.size} OSM ways in bicycle/MTB route relations`,
+    );
+
     console.log("Phase 2: Formatting trails...");
 
     await writeFormattedFeatures(
-
       paths.input.geoJSON.trails,
-
       paths.output.trails,
-
-      (feature) => formatTrail(feature as InputTrailFeature),
-
+      (feature) =>
+        formatTrail(feature as InputTrailFeature, routeMemberWayIds),
     );
 
     await mergeTrailGroupsInFile(paths.output.trails);

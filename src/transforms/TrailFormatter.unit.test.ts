@@ -1,5 +1,29 @@
 import { TrailCategory } from "../format";
-import { getTrailCategory } from "./TrailFormatter";
+import { formatTrail, getTrailCategory } from "./TrailFormatter";
+
+describe("formatTrail", () => {
+  it("drops ways that belong to a signed route relation", () => {
+    const feature = {
+      type: "Feature" as const,
+      geometry: {
+        type: "LineString" as const,
+        coordinates: [
+          [13.05, 55.626],
+          [13.051, 55.626],
+        ],
+      },
+      properties: {
+        type: "way",
+        id: 42,
+        tags: { highway: "path", "mtb:scale": "0" },
+        relations: [{ rel: 9856915, reltags: { route: "mtb" } }],
+      },
+    };
+
+    expect(formatTrail(feature)).toEqual([]);
+    expect(formatTrail(feature, new Set([42]))).toEqual([]);
+  });
+});
 
 describe("getTrailCategory", () => {
   it("ignores urban cycleways", () => {

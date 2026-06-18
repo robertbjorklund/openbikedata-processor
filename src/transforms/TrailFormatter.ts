@@ -37,6 +37,10 @@ import {
 } from "./OSMTransforms";
 
 import getStatusAndValue from "./Status";
+import {
+  type RouteMemberWayIndex,
+  wayIsRouteMember,
+} from "./RouteMemberWayIndex";
 
 
 
@@ -50,36 +54,29 @@ const MIN_MTB_TRAIL_LENGTH_METERS = 200;
 
 
 
-export function formatTrail(feature: InputTrailFeature) {
-
+export function formatTrail(
+  feature: InputTrailFeature,
+  routeMemberWayIds: RouteMemberWayIndex = new Set(),
+) {
   if (
-
     feature.geometry.type !== "LineString" &&
-
     feature.geometry.type !== "MultiLineString"
-
   ) {
-
     return [];
-
   }
-
-
 
   if (!isValidGeometryInFeature(feature)) {
-
     return [];
-
   }
 
-
+  if (wayIsRouteMember(feature.properties, routeMemberWayIds)) {
+    return [];
+  }
 
   const tags = feature.properties.tags;
 
   if (isExcluded(tags)) {
-
     return [];
-
   }
 
 

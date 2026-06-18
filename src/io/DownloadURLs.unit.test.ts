@@ -13,9 +13,10 @@ describe("Overpass queries", () => {
     expect(query).not.toContain("cycleway:lane");
   });
 
-  it("includes bicycle route relations", () => {
+  it("includes bicycle and mtb route relations", () => {
     const query = routesDownloadConfig.query(null);
     expect(query).toContain("relation[route=bicycle]");
+    expect(query).toContain("relation[route=mtb]");
   });
 
   it("applies bbox when provided", () => {

@@ -32,6 +32,8 @@ function route(
       to: null,
       via: null,
       network,
+      osmRouteType: "bicycle",
+      osmColour: null,
       distance: null,
       roundtrip: null,
       pavedRatio: null,

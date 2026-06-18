@@ -37,6 +37,8 @@ describe("formatRoute", () => {
     expect(features[0].properties.sources[0].id).toBe("relation/103925");
     expect(features[0].properties.id).toBe(features[0].properties.id);
     expect(features[0].properties.type).toBe(FeatureType.Route);
+    expect(features[0].properties.osmRouteType).toBe("bicycle");
+    expect(features[0].properties.osmColour).toBeNull();
     expect(features[0].properties.pavedRatio).toBeNull();
   });
 
@@ -66,5 +68,36 @@ describe("formatRoute", () => {
     );
 
     expect(features[0].properties.pavedRatio).toBe(0.8);
+  });
+
+  it("keeps one feature per mtb route relation", () => {
+    const features = formatRoute({
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [13.05, 55.626],
+          [13.06, 55.627],
+        ],
+      },
+      properties: {
+        type: "relation",
+        id: 9856915,
+        tags: {
+          type: "route",
+          route: "mtb",
+          name: "Spillepengen Röd",
+          colour: "red",
+        },
+      },
+    });
+
+    expect(features).toHaveLength(1);
+    expect(features[0].properties.name).toBe("Spillepengen Röd");
+    expect(features[0].properties.sources[0].id).toBe("relation/9856915");
+    expect(features[0].properties.type).toBe(FeatureType.Route);
+    expect(features[0].properties.osmRouteType).toBe("mtb");
+    expect(features[0].properties.osmColour).toBe("red");
+    expect(features[0].properties.network).toBeNull();
   });
 });

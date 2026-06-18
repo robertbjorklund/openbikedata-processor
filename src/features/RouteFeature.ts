@@ -8,6 +8,8 @@ export interface OSMRouteTags {
   ref?: string;
   distance?: string;
   roundtrip?: string;
+  colour?: string;
+  "colour:back"?: string;
   [key: string]: string | undefined;
 }
 

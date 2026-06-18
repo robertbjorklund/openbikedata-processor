@@ -27,12 +27,15 @@ export const trailsDownloadConfig: OSMDownloadConfig = {
 };
 
 /**
- * Signed bicycle route relations (lcn/ncn/rcn/icn and local networks).
+ * Signed bicycle routes (lcn/ncn/rcn/icn) and MTB route relations (`route=mtb`).
  */
 export const routesDownloadConfig: OSMDownloadConfig = {
   query: (bbox) => `
     [out:json][timeout:${overpassTimeoutSeconds()}]${overpassBBoxQuery(bbox)};
-    relation[route=bicycle];
+    (
+      relation[route=bicycle];
+      relation[route=mtb];
+    );
     (._; >;);
     out;
     `,

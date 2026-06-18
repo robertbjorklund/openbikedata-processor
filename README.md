@@ -23,16 +23,17 @@ Overpass API (OSM)
 
 ## Trail and route types
 
-OpenBikeMap separates **MTB trails** and **signed bicycle routes**. Urban cycleways, footways, and other generic designated paths are **not** included.
+OpenBikeMap separates **MTB trails**, **signed bicycle routes**, and **MTB route relations** (`route=mtb`). Urban cycleways, footways, and other generic designated paths are **not** included.
 
 | Layer | OSM sources | Output |
 |-------|-------------|--------|
 | **MTB trails** | `path`/`track` with `mtb:scale`, `mtb:scale:imba`, or `mtb=yes` | `trails` MVT layer |
-| **Bicycle routes** | `relation[route=bicycle]` (LCN, RCN, NCN, ICN, etc.) | `routes` MVT layer |
+| **Bicycle routes** | `relation[route=bicycle]` (LCN, RCN, NCN, ICN, etc.) | `routes` MVT layer (`osmRouteType=bicycle`) |
+| **MTB routes** | `relation[route=mtb]` (signed loops, bike parks, XC trails) | `routes` MVT layer (`osmRouteType=mtb`, colour from OSM `colour`) |
 
 The Overpass download and `TrailFormatter` both exclude `highway=cycleway`, footways, bridleways, and paths tagged only with `bicycle=designated`. Unnamed MTB fragments shorter than 200 m are dropped unless they have a name or ref.
 
-When `TRAILS_BBOX_GRID` is set, **trails and bicycle routes** are downloaded cell-by-cell (Overpass-friendly). Route relations that span cells are deduplicated by OSM id.
+When `TRAILS_BBOX_GRID` is set, **trails and routes** (bicycle + mtb) are downloaded cell-by-cell (Overpass-friendly). Route relations that span cells are deduplicated by OSM id.
 
 Signed route geometry may pass through urban streets when the official route does — that is intentional and distinct from importing every local cycle path.
 

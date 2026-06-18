@@ -5,7 +5,7 @@ import {
   TrailProperties,
 } from "../format";
 import { stableFeatureId } from "./FeatureBuilder";
-import { getRouteLinkKeys } from "./FeatureMerger";
+import { getRouteLinkKeys } from "./RouteDisplayName";
 
 class UnionFind {
   private parent: number[];

@@ -105,6 +105,8 @@ function route(
       to: null,
       via: null,
       network,
+      osmRouteType: "bicycle",
+      osmColour: null,
       distance: null,
       roundtrip: null,
       pavedRatio: null,
@@ -188,6 +190,8 @@ describe("getRouteGroupKey", () => {
         to: null,
         via: null,
         network: "lcn",
+        osmRouteType: "bicycle",
+        osmColour: null,
         distance: null,
         roundtrip: null,
         pavedRatio: null,
@@ -195,7 +199,7 @@ describe("getRouteGroupKey", () => {
         status: Status.Operating,
         sources: [],
       }),
-    ).toBe("name:kustlinjen");
+    ).toBe("name:bicycle:lcn:kustlinjen");
   });
 });
 

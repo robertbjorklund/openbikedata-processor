@@ -1,5 +1,6 @@
 import length from "@turf/length";
 import { readAllFeatures } from "../io/GeoJSONRewrite";
+import { isSupportedOsmRoute } from "./OsmRouteTypes";
 
 const GRAVEL_SURFACES = new Set([
   "gravel",
@@ -83,7 +84,7 @@ export async function buildRouteSurfaceIndex(
     }
 
     for (const relation of properties.relations) {
-      if (relation.reltags?.route !== "bicycle") {
+      if (!relation.reltags || !isSupportedOsmRoute(relation.reltags)) {
         continue;
       }
 

@@ -4,7 +4,7 @@ import {
   TrailFeature,
 } from "../format";
 import { mtbTrailColor } from "../format/MtbTrailColors";
-import { routeNetworkColor } from "../format/RouteNetworkColors";
+import { routeLineColor } from "../format/RouteLineColors";
 
 export interface MapboxGLTrailProperties {
   id: string;
@@ -31,6 +31,8 @@ export interface MapboxGLRouteProperties {
   to: string | null;
   via: string | null;
   network: string | null;
+  osmRouteType: string;
+  osmColour: string | null;
   color: string;
   pavedRatio: number | null;
   /** OSM relation/way id for linking (e.g. relation/103925) */
@@ -77,7 +79,13 @@ export function formatRouteForMapboxGL(
       to: properties.to,
       via: properties.via,
       network: properties.network,
-      color: routeNetworkColor(properties.network),
+      osmRouteType: properties.osmRouteType,
+      osmColour: properties.osmColour,
+      color: routeLineColor(
+        properties.osmRouteType,
+        properties.network,
+        properties.osmColour,
+      ),
       pavedRatio: properties.pavedRatio,
       osmId: properties.sources[0]?.id ?? null,
     },

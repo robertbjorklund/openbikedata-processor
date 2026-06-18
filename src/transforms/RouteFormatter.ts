@@ -10,9 +10,21 @@ import { buildFeatureWithId, stableFeatureId } from "./FeatureBuilder";
 import { isValidGeometryInFeature } from "./GeoTransforms";
 import { getOSMName, getOSMRef, mapOSMBoolean, mapOSMString } from "./OSMTransforms";
 import { RouteSurfaceIndex } from "./RouteSurfaceIndex";
+import { isSupportedOsmRoute, type OsmRouteType } from "./OsmRouteTypes";
 import getStatusAndValue from "./Status";
 
 type RoutePropsWithoutId = Omit<RouteProperties, "id" | "groupId" | "stageId">;
+
+function getOsmColour(tags: {
+  colour?: string;
+  "colour:back"?: string;
+}): string | null {
+  return mapOSMString(tags.colour) ?? mapOSMString(tags["colour:back"]);
+}
+
+function getOsmRouteType(tags: { route?: string }): OsmRouteType {
+  return tags.route as OsmRouteType;
+}
 
 export function formatRoute(
   feature: InputRouteFeature,
@@ -30,7 +42,7 @@ export function formatRoute(
   }
 
   const tags = feature.properties.tags;
-  if (tags.route !== "bicycle") {
+  if (!isSupportedOsmRoute(tags)) {
     return [];
   }
 
@@ -50,6 +62,8 @@ export function formatRoute(
     to: mapOSMString(tags.to),
     via: mapOSMString(tags.via),
     network: mapOSMString(tags.network),
+    osmRouteType: getOsmRouteType(tags),
+    osmColour: getOsmColour(tags),
     distance: mapOSMString(tags.distance),
     roundtrip: mapOSMBoolean(tags.roundtrip),
     pavedRatio: surfaceIndex.get(feature.properties.id) ?? null,

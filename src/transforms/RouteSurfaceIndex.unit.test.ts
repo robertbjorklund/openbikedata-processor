@@ -54,4 +54,35 @@ describe("buildRouteSurfaceIndex", () => {
       await rm(dir, { recursive: true, force: true });
     }
   });
+
+  it("includes mtb route relations in paved share", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "route-surface-"));
+    const path = join(dir, "routes.geojson");
+
+    try {
+      await writeFeatureCollection(path, [
+        {
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              [13.05, 55.626],
+              [13.051, 55.626],
+            ],
+          },
+          properties: {
+            type: "way",
+            id: 1,
+            tags: { highway: "path", surface: "gravel" },
+            relations: [{ rel: 9856915, reltags: { route: "mtb" } }],
+          },
+        },
+      ]);
+
+      const index = await buildRouteSurfaceIndex(path);
+      expect(index.get(9856915)).toBe(0);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
 });
