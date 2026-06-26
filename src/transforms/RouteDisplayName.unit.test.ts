@@ -75,7 +75,7 @@ describe("getRouteLinkKeys", () => {
     const keys = getRouteLinkKeys(
       routeProps({ name: "Sverigeleden", ref: "23", network: "ncn" }),
     );
-    expect(keys).toContain("ref:bicycle:ncn:23");
-    expect(keys).toContain("name:bicycle:ncn:sverigeleden");
+    expect(keys).toContain("ref:bicycle:ncn:23:sverigeleden");
+    expect(keys).toContain("name:bicycle:ncn:sverigeleden:mellersta");
   });
 });

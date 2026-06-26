@@ -93,7 +93,21 @@ describe("Route link keys (ROUTE-GROUPING.md spec)", () => {
         routeProps({ name: "Sverigeleden", ref: "23", network: "ncn" }),
       );
       expect(fromName).toContain("ref:bicycle:ncn:23");
-      expect(fromRef).toContain("ref:bicycle:ncn:23");
+      expect(fromName).toContain("name:bicycle:ncn:sverigeleden:mellersta");
+      expect(fromRef).toContain("name:bicycle:ncn:sverigeleden:mellersta");
+    });
+
+    it("uses section-scoped name key for Sverigeleden etapper", () => {
+      const norra = getRouteLinkKeys(
+        routeProps({ name: "Sverigeleden (3)", ref: "3", network: "ncn" }),
+      );
+      const mellersta = getRouteLinkKeys(
+        routeProps({ name: "Sverigeleden (20)", ref: "20", network: "ncn" }),
+      );
+      expect(norra).toContain("name:bicycle:ncn:sverigeleden:norra");
+      expect(mellersta).toContain("name:bicycle:ncn:sverigeleden:mellersta");
+      expect(norra).not.toContain("name:bicycle:ncn:sverigeleden");
+      expect(mellersta).not.toContain("name:bicycle:ncn:sverigeleden");
     });
 
     it("does not emit rcn ref-only key when qualifier is leg", () => {
@@ -131,6 +145,19 @@ describe("Route link keys (ROUTE-GROUPING.md spec)", () => {
       ]);
       expect(sameGroup(features, 0, 1)).toBe(true);
       expect(sameGroup(features, 0, 2)).toBe(false);
+    });
+
+    it("splits Sverigeleden into norra/mellersta/södra sections", () => {
+      const features = assignRouteGroupIds([
+        routeFeature("norra-a", "Sverigeleden (1)", "1"),
+        routeFeature("norra-b", "Sverigeleden (13)", "13"),
+        routeFeature("mellersta", "Sverigeleden (14)", "14"),
+        routeFeature("sodra", "Sverigeleden (29)", "29"),
+      ]);
+      expect(sameGroup(features, 0, 1)).toBe(true);
+      expect(sameGroup(features, 0, 2)).toBe(false);
+      expect(sameGroup(features, 2, 3)).toBe(false);
+      expect(sameGroup(features, 1, 2)).toBe(false);
     });
 
     it("does not group network umbrella legs with different parenthetical names", () => {

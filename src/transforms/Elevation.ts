@@ -7,6 +7,10 @@ import {
   extractPointsForElevationProfile,
   FeatureType,
 } from "../format";
+import {
+  profileSourceLine,
+  supportsElevationProfileGeometry,
+} from "../format/geometryElevationPath";
 import { InMemoryCache } from "../utils/InMemoryCache";
 import { TerrainTileElevationSource } from "./elevation/TerrainTileElevationSource";
 
@@ -42,7 +46,7 @@ function supportsElevationProfile(feature: GeoJSON.Feature): boolean {
   const type = feature.properties?.type;
   return (
     (type === FeatureType.Trail || type === FeatureType.Route) &&
-    feature.geometry.type === "LineString"
+    supportsElevationProfileGeometry(feature.geometry)
   );
 }
 
@@ -105,9 +109,12 @@ export async function createElevationProcessor(
 
   const enhanceFeature = async (feature: GeoJSON.Feature): Promise<void> => {
     const geometry = feature.geometry;
-    const elevationProfile = supportsElevationProfile(feature)
+    const profileLine = supportsElevationProfile(feature)
+      ? profileSourceLine(geometry as GeoJSON.LineString | GeoJSON.MultiLineString)
+      : null;
+    const elevationProfile = profileLine
       ? extractPointsForElevationProfile(
-          geometry as GeoJSON.LineString,
+          profileLine,
           elevationProfileResolution,
         )
       : null;

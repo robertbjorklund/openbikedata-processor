@@ -1,4 +1,5 @@
 import { RouteProperties } from "../format";
+import { getSverigeledenSectionForRoute } from "./SverigeledenSection";
 
 export type QualifierKind = "annotation" | "stageRef" | "leg" | null;
 
@@ -145,7 +146,11 @@ export function getRouteLinkKeys(properties: RouteProperties): string[] {
   if (refNorm) {
     const isIcnNcn = networkOnly === "icn" || networkOnly === "ncn";
     if (isIcnNcn) {
-      keys.push(`ref:${net}:${refNorm}`);
+      if (distinctName) {
+        keys.push(`ref:${net}:${refNorm}:${parsed.effectiveName}`);
+      } else {
+        keys.push(`ref:${net}:${refNorm}`);
+      }
     } else if (parsed?.qualifierKind === "stageRef") {
       keys.push(`ref:${net}:${refNorm}`);
     } else if (parsed?.qualifierKind === "leg") {
@@ -166,7 +171,15 @@ export function getRouteLinkKeys(properties: RouteProperties): string[] {
   }
 
   if (distinctName) {
-    keys.push(`name:${net}:${parsed.effectiveName}`);
+    const sverigeledenSection = getSverigeledenSectionForRoute(
+      properties,
+      parsed,
+    );
+    if (sverigeledenSection) {
+      keys.push(`name:${net}:sverigeleden:${sverigeledenSection}`);
+    } else {
+      keys.push(`name:${net}:${parsed.effectiveName}`);
+    }
   }
 
   if (parsed?.qualifierKind === "leg" && parsed.base && parsed.qualifier) {

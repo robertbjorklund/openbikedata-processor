@@ -26,6 +26,7 @@ import {
   assignRouteGroupIds,
   assignTrailGroupIds,
 } from "./transforms/AssignFeatureGroupIds";
+import coalesceRouteStages from "./transforms/normalization/CoalesceRouteStages";
 import combineRouteSegments from "./transforms/normalization/CombineRouteSegments";
 import combineTrailSegments from "./transforms/normalization/CombineTrailSegments";
 import {
@@ -126,6 +127,8 @@ export default async function prepare(paths: DataPaths, config: Config) {
     );
 
     await combineRouteSegmentsInFile(paths.output.routes);
+
+    await coalesceRouteStagesInFile(paths.output.routes);
 
     await assignRouteGroupIdsInFile(paths.output.routes);
 
@@ -314,6 +317,24 @@ async function combineRouteSegmentsInFile(path: string) {
   console.log(
 
     `Combined connected route segments: ${routes.length} → ${combined.length} features`,
+
+  );
+
+}
+
+
+
+async function coalesceRouteStagesInFile(path: string) {
+
+  const routes = (await readAllFeatures(path)) as RouteFeature[];
+
+  const coalesced = coalesceRouteStages(routes);
+
+  await writeFeatureCollection(path, coalesced);
+
+  console.log(
+
+    `Coalesced route stages: ${routes.length} → ${coalesced.length} features`,
 
   );
 

@@ -82,7 +82,7 @@ If `ref` tag is present and non-empty, let `refNorm` = normalized ref (parenthes
 
 | Network | Emit |
 |---------|------|
-| `icn`, `ncn` | always `ref:{net}:{refNorm}` |
+| `icn`, `ncn` | `ref:{net}:{refNorm}` when no distinct name; `ref:{net}:{refNorm}:{effectiveName}` when distinct name (prevents unrelated NCN/ICN routes sharing the same ref from merging) |
 | `rcn`, `lcn` | see **R1b** |
 
 **R1b — rcn / lcn ref tag**
@@ -107,6 +107,18 @@ This links `"Sverigeleden (23)"` with `"Sverigeleden"` + `ref=23` on the same ne
 If the route has a **distinct** (non-generic) effective name:
 
 - Emit `name:{net}:{effectiveName}`
+
+**R3b — Sverigeleden sections (NCN)**
+
+When `effectiveName` is `sverigeleden` and the etapp number is known (from parenthetical `stageRef` or matching `ref` tag), emit a **section-scoped** name key instead of the umbrella key:
+
+```
+name:{net}:sverigeleden:norra     — etapp 1–13
+name:{net}:sverigeleden:mellersta  — etapp 14–28
+name:{net}:sverigeleden:sodra     — etapp 29–39
+```
+
+Ranges follow [Sweden by Bike](https://swedenbybike.com/cykelleder/sverigeleden/). Do **not** emit bare `name:{net}:sverigeleden` when a section applies — this keeps Norra / Mellersta / Södra as separate logical routes in search and UI.
 
 **Effective name:**
 
@@ -150,7 +162,9 @@ When a group has **multiple** stages, UI shows stage list (EuroVelo, Sverigelede
 
 | Route A | Route B | Same `groupId`? | Shared key |
 |---------|---------|-----------------|------------|
-| `Sverigeleden (23)`, ncn | `Sverigeleden`, ref `23`, ncn | **Yes** | `ref:ncn:23` |
+| `Sverigeleden (23)`, ncn | `Sverigeleden`, ref `23`, ncn | **Yes** | `ref:bicycle:ncn:23` |
+| `Sverigeleden (3)`, ncn | `Sverigeleden (13)`, ncn | **Yes** | `name:bicycle:ncn:sverigeleden:norra` |
+| `Sverigeleden (13)`, ncn | `Sverigeleden (14)`, ncn | **No** | — (norra vs mellersta) |
 | `Regionalt cykelnät X (Stråk A)`, rcn | `Regionalt cykelnät X (Stråk B)`, rcn | **No** | — |
 | `Mälardalsleden`, rcn | `Mälardalsleden (planerat)`, rcn | **Yes** | `name:rcn:mälardalsleden` (annotation ignored) |
 | `EuroVelo 3`, ref `EV3`, icn | `EuroVelo 3`, ref `EV3`, icn (other relation) | **Yes** | `ref:icn:ev3` |
