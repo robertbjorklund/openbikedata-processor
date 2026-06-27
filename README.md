@@ -85,6 +85,41 @@ Re-run formatting without re-downloading:
 ./run.sh --skip-download
 ```
 
+### Regional patch: Sälen (Salen bike park)
+
+Refresh trails and routes around Sälen without rebuilding all of Sweden:
+
+```powershell
+cd openbikedata-processor
+
+# Requires an existing national dataset in .\data (from dev-tiles-sweden.ps1)
+.\scripts\merge-salen.ps1 -Fetch
+```
+
+This will:
+
+1. Download and process OSM for the Salen bbox `[12.7, 61.05, 13.05, 61.25]` into `data-salen/`
+2. Remove stale base features inside that bbox from `data/`
+3. Merge in the fresh patch (trails, routes, mapboxgl GeoJSON)
+4. Regenerate `openbikemap.mbtiles` from the merged mapboxgl layers
+
+Options:
+
+| Flag | Description |
+|------|-------------|
+| `-Fetch` | Download fresh OSM for Salen before merging |
+| `-BaseDir` | Existing national dataset (default `data`) |
+| `-PatchDir` | Regional build output (default `data-salen`) |
+| `-OutputDir` | Where to write merged files (default `data`) |
+| `-SkipTiles` | Skip tippecanoe rebuild (tile-join MBTiles fallback) |
+
+Manual merge for other regions:
+
+```bash
+npm run build
+npm run merge-outputs -- data-merged data data-patch --replace-bbox "[12.7,61.05,13.05,61.25]" --tiles
+```
+
 ## Environment variables
 
 | Variable | Default | Description |

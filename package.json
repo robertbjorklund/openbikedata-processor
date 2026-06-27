@@ -45,6 +45,8 @@
     "prepare-geojson": "node --max-old-space-size=4096 dist/scripts/prepare_geojson.js",
     "extract-tiles": "node dist/scripts/extract_tiles.js",
     "summarize-data": "node dist/scripts/summarize_data.js",
+    "merge-outputs": "node --max-old-space-size=4096 dist/scripts/merge_outputs.js",
+    "regenerate-tiles": "node --max-old-space-size=4096 dist/scripts/regenerate_tiles.js",
     "docker:run": "docker compose run --rm processor",
     "docker:tiles": "docker compose run --rm processor bash run.sh --skip-download"
   }
